@@ -23,6 +23,7 @@ cd "$WS/src"
 printf 'CONFIG_IPOD_TOUCH=y\n' > configs/devices/arm-softmmu/default.mak
 # The qtest/fuzz libraries fail to build with bionic and are test-only.
 sed -i "s|^subdir('tests/qtest/libqos')|#&|; s|^subdir('tests/qtest/fuzz')|#&|" meson.build
+sed -i "s|^subdir('qtest')|#&|" tests/meson.build
 
 mkdir -p build
 cd build
