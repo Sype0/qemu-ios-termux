@@ -12,8 +12,9 @@ $APT update
 $APT upgrade
 $APT install x11-repo
 $APT update
-$APT install clang lld make ninja pkg-config python meson git binutils \
+$APT install clang lld make ninja pkg-config python python-pip git binutils \
 	glib libpixman sdl2 openssl zlib libandroid-shmem libandroid-glob
+pip install meson
 
 cd "$WS/src"
 mkdir -p build
