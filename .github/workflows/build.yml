@@ -1,0 +1,52 @@
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: devos50/qemu-ios branch
+        default: ipod_touch_1g
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    env:
+      REF: ${{ github.event.inputs.ref || 'ipod_touch_1g' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch qemu-ios source
+        run: |
+          git clone --depth 1 -b "$REF" https://github.com/devos50/qemu-ios src
+          cd src
+          git submodule update --init --depth 1 dtc ui/keycodemapdb \
+            tests/fp/berkeley-softfloat-3 tests/fp/berkeley-testfloat-3
+          git log -1 --format='%H %s'
+
+      - name: Build inside Termux container
+        run: |
+          chmod -R a+rwX "$GITHUB_WORKSPACE"
+          docker run --rm --privileged \
+            -v "$GITHUB_WORKSPACE:/data/data/com.termux/files/home/ws" \
+            termux/termux-docker:aarch64 \
+            bash /data/data/com.termux/files/home/ws/build-termux.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qemu-ios-1g-termux-aarch64
+          path: out/*.tar.xz
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest >/dev/null 2>&1 || \
+            gh release create latest --title "qemu-ios 1G (Termux aarch64)" \
+              --notes "Built by CI from devos50/qemu-ios $REF"
+          gh release upload latest out/*.tar.xz --clobber
