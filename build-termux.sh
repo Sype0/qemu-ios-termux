@@ -12,7 +12,7 @@ $APT update
 $APT upgrade
 $APT install x11-repo
 $APT update
-$APT install clang lld make ninja pkg-config python python-pip git binutils \
+$APT install clang lld make ninja pkg-config python python-pip perl git binutils \
 	glib libpixman sdl2 openssl zlib libandroid-shmem libandroid-glob
 pip install meson
 
@@ -41,7 +41,7 @@ EXTRA_CFLAGS+=" -Wno-error=implicit-function-declaration -Wno-error=implicit-int
 	--extra-cflags="$EXTRA_CFLAGS" \
 	--extra-ldflags="-lcrypto -landroid-shmem -landroid-glob -llog"
 
-make -j"$(nproc)"
+ninja -k 0 -j"$(nproc)"
 make install
 
 cp "$WS/run-ipod.sh" "$INSTALL_PREFIX/bin/"
