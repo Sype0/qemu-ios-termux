@@ -17,6 +17,13 @@ $APT install clang lld make ninja pkg-config python python-pip perl git binutils
 pip install meson
 
 cd "$WS/src"
+
+# Only the iPod touch machine: the rest of arm-softmmu (vfio, vhost-user...)
+# doesn't build against Termux's newer kernel headers and isn't needed.
+printf 'CONFIG_IPOD_TOUCH=y\n' > configs/devices/arm-softmmu/default.mak
+# The qtest/fuzz libraries fail to build with bionic and are test-only.
+sed -i "s|^subdir('tests/qtest/libqos')|#&|; s|^subdir('tests/qtest/fuzz')|#&|" meson.build
+
 mkdir -p build
 cd build
 
@@ -31,6 +38,9 @@ EXTRA_CFLAGS+=" -Wno-error=implicit-function-declaration -Wno-error=implicit-int
 	--with-git-submodules=ignore \
 	--target-list=arm-softmmu \
 	--without-default-features \
+	--without-default-devices \
+	--disable-vhost-user \
+	--disable-vhost-kernel \
 	--enable-sdl \
 	--enable-vnc \
 	--enable-fdt=internal \
