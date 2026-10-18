@@ -18,9 +18,6 @@ pip install meson
 
 cd "$WS/src"
 
-# Only the iPod touch machine: the rest of arm-softmmu (vfio, vhost-user...)
-# doesn't build against Termux's newer kernel headers and isn't needed.
-printf 'CONFIG_IPOD_TOUCH=y\n' > configs/devices/arm-softmmu/default.mak
 # The qtest/fuzz libraries fail to build with bionic and are test-only.
 sed -i "s|^subdir('tests/qtest/libqos')|#&|; s|^subdir('tests/qtest/fuzz')|#&|" meson.build
 sed -i "s|^subdir('qtest')|#&|" tests/meson.build
@@ -35,6 +32,9 @@ cd build
 EXTRA_CFLAGS="-Wno-error=incompatible-function-pointer-types -Wno-error=int-conversion"
 EXTRA_CFLAGS+=" -Wno-error=implicit-function-declaration -Wno-error=implicit-int"
 
+# --without-default-devices keeps the ARM machines listed in default.mak (the
+# iPod needs devices they pull in) but drops "default y" extras such as vfio,
+# which doesn't build against Termux's kernel headers.
 ../configure \
 	--prefix="$INSTALL_PREFIX" \
 	--cc=clang --cxx=clang++ --objcc=clang --host-cc=clang \
