@@ -24,6 +24,9 @@ printf 'CONFIG_IPOD_TOUCH=y\n' > configs/devices/arm-softmmu/default.mak
 # The qtest/fuzz libraries fail to build with bionic and are test-only.
 sed -i "s|^subdir('tests/qtest/libqos')|#&|; s|^subdir('tests/qtest/fuzz')|#&|" meson.build
 sed -i "s|^subdir('qtest')|#&|" tests/meson.build
+# vhost-user-server.c only serves the (disabled) vhost-user exports and clashes
+# with Termux's <linux/virtio_types.h>.
+sed -i "s|files('vhost-user-server.c'), vhost_user||" util/meson.build
 
 mkdir -p build
 cd build
