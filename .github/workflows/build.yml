@@ -32,10 +32,17 @@ jobs:
       - name: Build inside Termux container
         run: |
           chmod -R a+rwX "$GITHUB_WORKSPACE"
+          # configure and helper scripts use /bin/sh and /usr/bin/env shebangs,
+          # which termux-exec would normally rewrite; give them real paths.
           docker run --rm --privileged \
             -v "$GITHUB_WORKSPACE:/data/data/com.termux/files/home/ws" \
+            --entrypoint /entrypoint_root.sh \
             termux/termux-docker:aarch64 \
-            bash /data/data/com.termux/files/home/ws/build-termux.sh
+            /system/bin/sh -c '
+              P=/data/data/com.termux/files/usr/bin
+              [ -e /bin ] || ln -s $P /bin
+              mkdir -p /usr && { [ -e /usr/bin ] || ln -s $P /usr/bin; }
+              exec /entrypoint.sh bash /data/data/com.termux/files/home/ws/build-termux.sh'
 
       - uses: actions/upload-artifact@v4
         with:
