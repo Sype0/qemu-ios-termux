@@ -24,6 +24,7 @@ if [ ! -d nand ]; then
 	fetch nand_n45ap.zip
 	command -v unzip >/dev/null || pkg install -y unzip
 	unzip -q nand_n45ap.zip
+	rm -rf __MACOSX
 	rm nand_n45ap.zip
 fi
 
